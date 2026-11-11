@@ -1,7 +1,7 @@
 <template>
   <article class="sf-product" @click="goToDetail">
     <div class="sf-product-media">
-      <img :src="product.images || fallbackImage" :alt="product.title" loading="lazy" @error="onImageError" />
+      <img :src="product.images || fallbackImage" :alt="product.title" loading="lazy" referrerpolicy="no-referrer" @error="onImageError" />
       <span v-if="stockBadge" class="sf-product-flag" :class="stockBadge.className">
         {{ stockBadge.label }}
       </span>

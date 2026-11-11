@@ -29,7 +29,7 @@
             <span class="gallery-flag">
               <i class="bx bx-badge-check"></i> Chính hãng 100%
             </span>
-            <img :src="product.images || fallbackImage" :alt="product.title" @error="onImageError" />
+            <img :src="product.images || fallbackImage" :alt="product.title" referrerpolicy="no-referrer" @error="onImageError" />
             <div class="gallery-note">
               <span><i class="bx bx-package"></i> Đóng gói cẩn thận</span>
               <span><i class="bx bx-refresh"></i> Đổi trả 7 ngày</span>
