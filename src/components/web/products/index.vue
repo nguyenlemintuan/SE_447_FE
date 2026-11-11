@@ -1,515 +1,767 @@
 <template>
-  <div class="container-fluid">
-    <!-- Thanh lọc -->
-    <div class="row">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-body">
-            <div class="row g-2 align-items-center">
-
-              <div class="col-12 col-md-6">
-                <div class="position-relative">
-                  <input type="text" v-model="searchQuery" @input="applyFilters" class="form-control ps-5"
-                    placeholder="Tìm kiếm sản phẩm..." />
-                  <span class="position-absolute top-50 start-0 translate-middle-y ps-2">
-                    <i class="bx bx-search"></i>
-                  </span>
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <div class="dropdown w-100">
-                  <button class="btn btn-white w-100 text-start dropdown-toggle" type="button"
-                    data-bs-toggle="dropdown">
-                    {{ sortLabel }}
-                  </button>
-                  <ul class="dropdown-menu w-100">
-                    <li><a class="dropdown-item" href="#" @click.prevent="setSort('')">Tất cả</a></li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="setSort('asc')">Giá thấp đến cao</a></li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="setSort('desc')">Giá cao đến thấp</a></li>
-                  </ul>
-                </div>
-              </div>
-
-              <div class="col-12 col-md-3">
-                <div class="dropdown w-100">
-                  <button class="btn btn-white w-100 text-start dropdown-toggle" type="button"
-                    data-bs-toggle="dropdown">
-                    {{ priceRangeLabel }}
-                  </button>
-                  <ul class="dropdown-menu w-100">
-                    <li><a class="dropdown-item" href="#" @click.prevent="setPriceRange('')">Tất cả</a></li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="setPriceRange('under10')">Dưới 10 triệu</a>
-                    </li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="setPriceRange('10to20')">10 - 20 triệu</a>
-                    </li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="setPriceRange('over20')">Trên 20 triệu</a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-            </div>
+  <div class="lt-page">
+    <div class="lt-container">
+      <!-- Page head -->
+      <div class="page-head">
+        <nav class="breadcrumb-line">
+          <router-link to="/">Trang chủ</router-link>
+          <i class="bx bx-chevron-right"></i>
+          <span>Sản phẩm</span>
+        </nav>
+        <div class="page-head-row">
+          <div>
+            <h1>Tất cả sản phẩm</h1>
+            <p>Chọn lọc thiết bị chính hãng với mức giá tốt nhất tại LifeTech.</p>
           </div>
+          <span class="page-count">{{ displayedProducts.length }} sản phẩm</span>
         </div>
       </div>
-    </div>
 
-    <!-- Danh sách sản phẩm -->
-    <div class="row mt-5">
-      <div v-for="(product, index) in filteredProducts" :key="index" class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-        <div class="card shadow-sm border-0 rounded position-relative" style="cursor: pointer"
-          @click="$router.push(`/web/chi-tiet-san-pham/${product.id}`)">
-          <div class="card-body text-center">
-            <img :src="product.images" alt="" class="img-fluid rounded" style="width: 120px; height: 120px" />
-            <div class="position-absolute top-0 end-0 m-3 product-discount">
-              <span>-10%</span>
-            </div>
-            <p class="fw-bold mt-2">{{ product.title }}</p>
-            <div class="clearfix">
-              <p class="mb-0 float-start">
-                <strong>{{ product.sold_quantity }}</strong> Sales
-              </p>
-              <p class="mb-0 float-end fw-bold">
-                <span class="me-2 text-decoration-line-through text-secondary">
-                  {{ formatCurrency(product.price * (1 + 0.1)) }}
-                </span>
-                <span>{{ formatCurrency(product.price) }}</span>
-              </p>
-            </div>
-            <div class="d-flex align-items-center mt-3 fs-6">
-              <div class="cursor-pointer">
-                <i v-for="star in 5" :key="star" :class="[
-                  'bx',
-                  star <= product.avgRating
-                    ? 'bxs-star text-warning'
-                    : 'bxs-star text-secondary',
-                ]"></i>
-              </div>
-              <p class="mb-0 ms-auto">
-                {{ product.avgRating }} ({{ product.reviewCount }})
-              </p>
-            </div>
-            <!-- Hàng nút hành động -->
-            <button class="btn btn-primary mb-2" @click.stop="buyNow(product)">
-              Mua ngay
-            </button>
-
-            <div class="action-row">
-              <button type="button" class="btn btn-secondary" @click.stop.prevent="addToCart(product)">
-                🛒 Thêm giỏ hàng
-              </button>
-              <button class="btn btn-secondary" @click.stop="goToRating(product)">
-                ⭐ Đánh giá
-              </button>
-            </div>
-
-            <!-- Đánh giá sao -->
-            <!-- <div class="rating mt-2">
-              <i
-                v-for="star in 5"
-                :key="star"
-                :class="[
-                  'bx',
-                  star <= product.avgRating ? 'bxs-star' : 'bx-star',
-                ]"
-              ></i>
-            </div> -->
+      <!-- AI search -->
+      <section class="ai-search-panel">
+        <div class="ai-search-head">
+          <span class="ai-spark"><i class="bx bx-bulb"></i></span>
+          <div>
+            <h2>Tìm kiếm bằng AI</h2>
+            <p>Mô tả nhu cầu bằng câu tự nhiên, AI sẽ chọn sản phẩm phù hợp nhất.</p>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Chat Box -->
-  <div class="row mt-5">
-    <div class="col-lg-12">
-      <ChatBox />
+        <form class="ai-search-form" @submit.prevent="runAiSearch">
+          <i class="bx bx-search-alt-2"></i>
+          <input v-model="aiQuery" type="text" :disabled="aiLoading"
+            placeholder="Ví dụ: điện thoại chụp ảnh đẹp, pin trâu dưới 15 triệu" aria-label="Tìm kiếm bằng AI" />
+          <button type="submit" class="lt-btn lt-btn-primary" :disabled="aiLoading || aiQuery.trim().length < 2">
+            <i v-if="aiLoading" class="bx bx-loader-alt bx-spin"></i>
+            <i v-else class="bx bx-bulb"></i>
+            {{ aiLoading ? "AI đang phân tích..." : "Tìm bằng AI" }}
+          </button>
+        </form>
+
+        <div class="ai-search-suggest">
+          <span>Thử:</span>
+          <button v-for="suggestion in aiSuggestions" :key="suggestion" type="button" class="ai-suggest-chip"
+            :disabled="aiLoading" @click="aiQuery = suggestion">
+            {{ suggestion }}
+          </button>
+        </div>
+
+        <p v-if="aiError" class="ai-search-error">
+          <i class="bx bx-error-circle"></i> {{ aiError }}
+        </p>
+      </section>
+
+      <!-- AI result banner -->
+      <div v-if="aiResult" class="ai-result-bar">
+        <div class="ai-result-copy">
+          <span class="ai-result-icon"><i class="bx bx-bulb"></i></span>
+          <div>
+            <strong>AI gợi ý {{ aiResult.products.length }} sản phẩm</strong>
+            <p>{{ aiResult.summary }}</p>
+          </div>
+        </div>
+        <button type="button" class="lt-btn lt-btn-outline" @click="clearAiSearch">
+          <i class="bx bx-x"></i> Xoá kết quả AI
+        </button>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-panel">
+        <div class="filter-search">
+          <i class="bx bx-search"></i>
+          <input v-model="searchQuery" type="search" placeholder="Tìm theo tên sản phẩm, thương hiệu..." />
+          <button v-if="searchQuery" type="button" class="filter-clear" aria-label="Xoá tìm kiếm"
+            @click="searchQuery = ''">
+            <i class="bx bx-x"></i>
+          </button>
+        </div>
+
+        <div class="filter-selects">
+          <label class="filter-select">
+            <span>Sắp xếp</span>
+            <select v-model="sortOrder">
+              <option value="">Mặc định</option>
+              <option value="asc">Giá thấp → cao</option>
+              <option value="desc">Giá cao → thấp</option>
+            </select>
+            <i class="bx bx-chevron-down"></i>
+          </label>
+
+          <label class="filter-select">
+            <span>Khoảng giá</span>
+            <select v-model="priceRange">
+              <option value="">Tất cả</option>
+              <option value="under10">Dưới 10 triệu</option>
+              <option value="10to20">10 – 20 triệu</option>
+              <option value="over20">Trên 20 triệu</option>
+            </select>
+            <i class="bx bx-chevron-down"></i>
+          </label>
+        </div>
+      </div>
+
+      <div class="lt-chips category-chips">
+        <button v-for="category in categoryOptions" :key="category" type="button" class="lt-chip"
+          :class="{ 'is-active': activeCategory === category }" @click="activeCategory = category">
+          {{ category }}
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div v-if="loading" class="product-grid">
+        <div v-for="n in 8" :key="n" class="product-skeleton">
+          <div class="lt-skeleton skeleton-image"></div>
+          <div class="lt-skeleton skeleton-line"></div>
+          <div class="lt-skeleton skeleton-line short"></div>
+        </div>
+      </div>
+
+      <!-- Products -->
+      <div v-else-if="displayedProducts.length" class="product-grid">
+        <ProductCard v-for="product in displayedProducts" :key="product.id" :product="product" @add="addToCart" />
+      </div>
+
+      <!-- Empty -->
+      <div v-else class="lt-empty">
+        <span class="lt-empty-icon"><i class="bx bx-search-alt"></i></span>
+        <h3>{{ aiResult ? "AI chưa tìm thấy sản phẩm phù hợp" : "Không tìm thấy sản phẩm phù hợp" }}</h3>
+        <p v-if="aiResult">Thử mô tả rõ hơn về nhu cầu và ngân sách của bạn.</p>
+        <p v-else>Thử từ khoá khác hoặc bỏ bớt bộ lọc để xem thêm sản phẩm.</p>
+        <button v-if="aiResult" type="button" class="lt-btn lt-btn-primary" @click="clearAiSearch">
+          <i class="bx bx-refresh"></i> Xoá kết quả AI
+        </button>
+        <button v-else type="button" class="lt-btn lt-btn-primary" @click="resetFilters">
+          <i class="bx bx-refresh"></i> Xoá bộ lọc
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import api from "@/api";
-import ChatBox from "../../chat/ChatBox.vue";
+import ProductCard from "../ProductCard.vue";
 
 export default {
-  components: { ChatBox },
+  components: { ProductCard },
   data() {
     return {
       products: [],
+      loading: true,
       searchQuery: "",
       sortOrder: "",
-      category: "",
+      activeCategory: "Tất cả",
       priceRange: "",
+      categoryOptions: ["Tất cả", "Điện thoại", "Laptop", "Máy tính bảng", "Phụ kiện"],
+      aiQuery: "",
+      aiLoading: false,
+      aiError: "",
+      aiResult: null,
+      aiSuggestions: [
+        "Điện thoại chụp ảnh đẹp dưới 15 triệu",
+        "Máy chơi game mượt, pin trâu",
+        "iPhone mới nhất giá tốt",
+      ],
     };
   },
   computed: {
-    sortLabel() {
-      if (this.sortOrder === "asc") return "Giá thấp đến cao";
-      if (this.sortOrder === "desc") return "Giá cao đến thấp";
-      return "Sắp xếp theo";
+    displayedProducts() {
+      return this.aiResult ? this.aiResult.products : this.filteredProducts;
     },
-    categoryLabel() {
-      return this.category || "Loại sản phẩm";
-    },
-    priceRangeLabel() {
-      if (this.priceRange === "under10") return "Dưới 10 triệu";
-      if (this.priceRange === "10to20") return "10 - 20 triệu";
-      if (this.priceRange === "over20") return "Trên 20 triệu";
-      return "Khoảng giá";
-    },
-
     filteredProducts() {
-      // Copy mảng để tránh lỗi tham chiếu
       let result = [...this.products];
 
-      // 1. Lọc sản phẩm còn hàng
-      result = result.filter((p) => p.quantity > 0);
-
-      // 2. Lọc theo từ khóa tìm kiếm
-      // Lưu ý: "sumsung" viết sai chính tả sẽ KHÔNG tìm ra "Samsung" (đây là logic chuẩn của lập trình căn bản)
-      if (this.searchQuery) {
+      if (this.searchQuery.trim()) {
         const query = this.searchQuery.toLowerCase().trim();
-        result = result.filter((p) => p.title.toLowerCase().includes(query));
-      }
-
-      // 3. Lọc theo danh mục (SỬA LỖI LOGIC)
-      // 4. Lọc theo danh mục (LOGIC MỚI: DỰA VÀO TÊN SẢN PHẨM)
-      // 4. Lọc theo danh mục (SỬA LẠI LOGIC CHẶT CHẼ HƠN)
-      if (this.category) {
-        const cat = this.category;
-        result = result.filter((p) => {
-          const title = p.title.toLowerCase();
-
-          // Điều kiện dùng chung: Không phải là tablet (không chứa tab, pad, tablet, ipad)
-          const isNotTablet = !["tab", "pad", "tablet", "ipad"].some(
-            (keyword) => title.includes(keyword)
-          );
-
-          if (cat === "Điện thoại") {
-            const isPhoneBrand = [
-              "iphone",
-              "samsung",
-              "oppo",
-              "xiaomi",
-              "vivo",
-              "realme",
-              "redmi",
-              "sony",
-              "pixel",
-            ].some((keyword) => title.includes(keyword));
-
-            return isPhoneBrand && isNotTablet;
-          }
-
-          if (cat === "Laptop") {
-            const isLaptopBrand = [
-              "macbook",
-              "dell",
-              "asus",
-              "hp",
-              "msi",
-              "acer",
-              "lenovo",
-              "thinkpad",
-              "surface",
-            ].some((keyword) => title.includes(keyword));
-
-            // SỬA Ở ĐÂY: Laptop cũng phải thỏa mãn điều kiện không phải Tablet
-            return isLaptopBrand && isNotTablet;
-          }
-
-          if (cat === "Máy tính bảng") {
-            return ["ipad", "tab", "pad", "tablet"].some((keyword) =>
-              title.includes(keyword)
-            );
-          }
-
-          return true;
+        result = result.filter((product) => {
+          const text = `${product.title || ""} ${product.brand || ""}`.toLowerCase();
+          return text.includes(query);
         });
       }
 
-      // 4. Lọc theo khoảng giá (SỬA LỖI PARSE GIÁ)
+      if (this.activeCategory !== "Tất cả") {
+        result = result.filter((product) =>
+          this.matchesCategory(product, this.activeCategory)
+        );
+      }
+
       if (this.priceRange) {
-        result = result.filter((p) => {
-          const price = this.convertPrice(p.price); // Sử dụng hàm chuyển đổi giá
+        result = result.filter((product) => {
+          const price = this.convertPrice(product.price);
           if (this.priceRange === "under10") return price < 10000000;
-          if (this.priceRange === "10to20")
+          if (this.priceRange === "10to20") {
             return price >= 10000000 && price <= 20000000;
-          if (this.priceRange === "over20") return price > 20000000;
-          return true;
+          }
+          return price > 20000000;
         });
       }
 
-      // 5. Sắp xếp (SỬA LỖI PARSE GIÁ)
       if (this.sortOrder) {
         result.sort((a, b) => {
           const priceA = this.convertPrice(a.price);
           const priceB = this.convertPrice(b.price);
-          if (this.sortOrder === "asc") return priceA - priceB;
-          if (this.sortOrder === "desc") return priceB - priceA;
-          return 0;
+          return this.sortOrder === "asc" ? priceA - priceB : priceB - priceA;
         });
       }
 
       return result;
     },
   },
-
+  watch: {
+    "$route.query": {
+      immediate: true,
+      handler(query) {
+        if (query.q && query.q !== this.searchQuery) {
+          this.searchQuery = String(query.q);
+        }
+        if (query.category) {
+          const category = String(query.category);
+          if (this.categoryOptions.includes(category)) {
+            this.activeCategory = category;
+          }
+        }
+      },
+    },
+  },
   mounted() {
     this.fetchProducts();
   },
-
   methods: {
-    // --- HÀM MỚI: CHUYỂN ĐỔI GIÁ TIỀN ---
-    // Giúp xử lý giá dạng "32.990.000" thành số 32990000 để tính toán
+    fetchProducts() {
+      this.loading = true;
+      api
+        .get("/customer/products/data")
+        .then((res) => {
+          const data = res.data?.data || [];
+          this.products = data.filter((product) => Number(product.quantity) > 0);
+        })
+        .catch((err) => {
+          console.error("Lỗi tải sản phẩm:", err);
+          this.products = [];
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    async runAiSearch() {
+      const query = this.aiQuery.trim();
+      if (query.length < 2 || this.aiLoading) return;
+
+      this.aiLoading = true;
+      this.aiError = "";
+
+      try {
+        const res = await api.post("/ai/search", { query });
+        this.aiResult = {
+          summary: res.data?.summary || "",
+          products: res.data?.data || [],
+        };
+      } catch (err) {
+        console.error("Lỗi tìm kiếm AI:", err);
+        this.aiResult = null;
+        this.aiError =
+          err.response?.data?.message ||
+          "AI đang bận, bạn vui lòng thử lại sau ít phút.";
+        if (this.$toast) this.$toast.error(this.aiError);
+      } finally {
+        this.aiLoading = false;
+      }
+    },
+    clearAiSearch() {
+      this.aiResult = null;
+      this.aiError = "";
+    },
     convertPrice(priceRaw) {
       if (!priceRaw) return 0;
-
-      // 1. Nếu đã là số (Number) thì trả về luôn, không cần xử lý chuỗi
       if (typeof priceRaw === "number") return priceRaw;
-
-      // 2. Nếu là chuỗi, xử lý các trường hợp đặc biệt
       let str = String(priceRaw);
-
-      // Nếu chuỗi kết thúc bằng .00 hoặc ,00 (đơn vị xu/hào) -> Cắt bỏ đi để tránh bị nhân 100
       if (str.endsWith(".00") || str.endsWith(",00")) {
-        str = str.substring(0, str.length - 3);
+        str = str.slice(0, -3);
       }
-
-      // Xóa hết các ký tự không phải số (dấu chấm, phẩy, chữ đ...)
-      const cleanString = str.replace(/[^0-9]/g, "");
-      return parseFloat(cleanString);
+      return parseFloat(str.replace(/[^0-9]/g, "")) || 0;
     },
-    // --- HÀM FORMAT TIỀN TỆ ---
-    formatCurrency(value) {
-      if (!value) return "0 đ";
-      // Chuyển đổi giá trị về số chuẩn trước khi format
-      const numberValue = this.convertPrice(value);
+    matchesCategory(product, category) {
+      const title = (product.title || "").toLowerCase();
+      const brand = (product.brand || "").toLowerCase();
+      const text = `${title} ${brand}`;
+      const isTablet = /ipad|\btab\b|tablet/.test(text);
+      const isLaptop = /macbook|dell|asus|\bhp\b|lenovo|acer|\bmsi\b|laptop|thinkpad/.test(text);
+      const isPhone = /iphone|samsung|xiaomi|oppo|vivo|realme|redmi|pixel|nokia|sony/.test(text) && !isTablet && !isLaptop;
 
-      // Làm tròn số (tránh lỗi hiển thị .001)
-      const roundedValue = Math.round(numberValue);
-
-      return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-      }).format(roundedValue);
+      if (category === "Điện thoại") return isPhone;
+      if (category === "Laptop") return isLaptop;
+      if (category === "Máy tính bảng") return isTablet;
+      if (category === "Phụ kiện") return !isPhone && !isLaptop && !isTablet;
+      return true;
     },
-
-    async fetchProducts() {
-      try {
-        const res = await api.get("/customer/products/data", {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("users_login"),
-          },
-        });
-        this.products = res.data.data;
-
-        // --- DEBUG: In ra để xem cấu trúc dữ liệu ---
-        if (this.products.length > 0) {
-          console.log("🔥 Dữ liệu 1 sản phẩm mẫu:", this.products[0]);
-          console.log(
-            "👉 Tên trường danh mục có thể là: category_name, category_id, type..."
-          );
-          console.log("👉 Giá tiền gốc (chưa xử lý):", this.products[0].price);
-        }
-        // --------------------------------------------
-      } catch (err) {
-        console.error("Lỗi tải sản phẩm:", err);
+    addToCart(product) {
+      const token = localStorage.getItem("users_login");
+      if (!token) {
+        this.$toast.warning("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
+        this.$router.push("/dang-nhap");
+        return;
       }
-    },
-
-    async addToCart(product) {
-      try {
-        await api.post(
+      api
+        .post(
           "/customer/gio-hang/add",
           { product_id: product.id, quantity: 1 },
-          {
-            headers: {
-              Authorization: "Bearer " + localStorage.getItem("users_login"),
-            },
-          }
-        );
-        this.$toast.success("Đã thêm vào giỏ hàng!");
-      } catch (err) {
-        console.error(err);
-      }
-    },
-
-    goToRating(product) {
-      this.$router.push(`/web/danh-gia/${product.id}`);
-    },
-    setSort(order) {
-      this.sortOrder = order;
-    },
-    setCategory(cat) {
-      this.category = cat;
-    },
-    setPriceRange(range) {
-      this.priceRange = range;
-    },
-    applyFilters() { },
-
-    formatCurrency(value) {
-      if (!value) return "0 đ";
-      // Đảm bảo value là số trước khi format hiển thị
-      return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-      }).format(this.convertPrice(value));
-    },
-
-    async buyNow(product) {
-      // ... (Giữ nguyên logic cũ của bạn)
-      try {
-        const payload = { items: [{ product_id: product.id, quantity: 1 }] };
-        const res = await api.post("/khach-hang/order/them-don-hang", payload, {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("users_login"),
-          },
+          { headers: { Authorization: "Bearer " + token } }
+        )
+        .then(() => {
+          this.$toast.success("Đã thêm sản phẩm vào giỏ hàng!");
+          window.dispatchEvent(new Event("cart:updated"));
+        })
+        .catch((err) => {
+          console.error("Lỗi thêm giỏ hàng:", err);
+          this.$toast.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại.");
         });
-        this.$router.push({
-          path: "/web/dat-hang",
-          query: { reload: Date.now() },
-        });
-      } catch (err) {
-        console.error("Lỗi tạo đơn hàng:", err);
+    },
+    resetFilters() {
+      this.searchQuery = "";
+      this.activeCategory = "Tất cả";
+      this.priceRange = "";
+      this.sortOrder = "";
+      if (this.$route.query.q || this.$route.query.category) {
+        this.$router.replace({ path: "/web/san-pham" });
       }
     },
   },
 };
 </script>
 
-<style>
-/* ==== TOÀN TRANG ==== */
-.container-fluid {
-  background-color: #fafafa;
-  padding: 40px 3%;
+<style scoped>
+.page-head {
+  margin-bottom: 24px;
 }
 
-/* ==== CARD SẢN PHẨM ==== */
-.card {
-  background: #fff;
-  border: none;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  overflow: visible;
-  text-align: center;
-  height: 100%;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* ==== ẢNH SẢN PHẨM ==== */
-.card-body img {
-  width: 100%;
-  height: 200px;
-  object-fit: contain;
-  margin-bottom: 10px;
-  transition: transform 0.3s ease;
-}
-
-.card:hover img {
-  transform: scale(1.05);
-}
-
-/* ==== TÊN & GIÁ ==== */
-.card-body p.fw-bold {
-  font-size: 1rem;
-  color: #222;
-  font-weight: 600;
-  margin: 8px 0 4px;
-  min-height: 45px;
-}
-
-.card-body p.fw-bold:hover {
-  color: #f97316;
-}
-
-.card-body span {
-  color: #ef4444;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-/* ==== NÚT HÀNH ĐỘNG ==== */
-.card .btn {
-  font-weight: 500;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  width: 100%;
-}
-
-.card .btn-primary {
-  background-color: #f97316;
-  border: none;
-  color: #fff;
-  font-weight: 600;
-  box-shadow: 0 3px 10px rgba(249, 115, 22, 0.3);
-}
-
-.card .btn-primary:hover {
-  background-color: #ea580c;
-}
-
-.card .btn-secondary {
-  background-color: #f3f4f6;
-  border: none;
-  color: #111;
-}
-
-.card .btn-secondary:hover {
-  background-color: #e5e7eb;
-}
-
-/* ==== ĐÁNH GIÁ ==== */
-.rating {
+.breadcrumb-line {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 2px;
-  margin-top: 6px;
-  color: #fbbf24;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--lt-muted);
+  margin-bottom: 14px;
 }
 
-.rating i {
+.breadcrumb-line a {
+  color: var(--lt-muted);
+}
+
+.breadcrumb-line a:hover {
+  color: var(--lt-orange-dark);
+}
+
+.breadcrumb-line i {
   font-size: 16px;
 }
 
-/* ==== GIẢM GIÁ ==== */
-.product-discount span {
-  background: #ef4444;
-  color: #fff;
-  padding: 3px 7px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-/* ==== BỐ CỤC NÚT DƯỚI ==== */
-.action-row {
+.page-head-row {
   display: flex;
-  gap: 6px;
-  margin-top: 10px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.action-row .btn {
+.page-head h1 {
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0 0 6px;
+}
+
+.page-head p {
+  color: var(--lt-muted);
+  font-size: 14px;
+}
+
+.page-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lt-orange-dark);
+  background: var(--lt-orange-soft);
+  border: 1px solid var(--lt-orange-line);
+  padding: 7px 14px;
+  border-radius: 999px;
+}
+
+.filter-panel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid var(--lt-line);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: var(--lt-shadow-sm);
+}
+
+.filter-search {
+  position: relative;
   flex: 1;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #f8fafc;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  padding: 0 12px;
+  height: 44px;
+  transition: all var(--lt-transition);
 }
 
-/* ==== RESPONSIVE ==== */
-@media (max-width: 576px) {
-  .card-body img {
-    height: 160px;
+.filter-search:focus-within {
+  background: #fff;
+  border-color: var(--lt-orange-line);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+}
+
+.filter-search i {
+  color: var(--lt-muted);
+  font-size: 18px;
+}
+
+.filter-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--lt-font);
+  font-size: 14px;
+  color: var(--lt-ink);
+}
+
+.filter-clear {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: var(--lt-ink-soft);
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.filter-selects {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 44px;
+  padding: 0 34px 0 14px;
+  border: 1px solid var(--lt-line);
+  border-radius: 11px;
+  background: #fff;
+  font-size: 13px;
+  color: var(--lt-ink-soft);
+  cursor: pointer;
+}
+
+.filter-select span {
+  color: var(--lt-muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.filter-select select {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--lt-font);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lt-ink);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  max-width: 150px;
+}
+
+.filter-select i {
+  position: absolute;
+  right: 10px;
+  color: var(--lt-muted);
+  font-size: 17px;
+  pointer-events: none;
+}
+
+.category-chips {
+  margin: 18px 0 22px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.product-skeleton {
+  background: #fff;
+  border: 1px solid var(--lt-line);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.skeleton-image {
+  aspect-ratio: 1 / 0.82;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+
+.skeleton-line {
+  height: 14px;
+  margin-bottom: 10px;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+@media (max-width: 1100px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .action-row {
+  .filter-selects {
+    width: 100%;
+  }
+
+  .filter-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .filter-select select {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .page-head-row {
+    align-items: flex-start;
     flex-direction: column;
+  }
+
+  .product-grid {
+    gap: 12px;
+  }
+
+  .filter-panel {
+    padding: 10px;
+  }
+
+  .filter-search {
+    min-width: 100%;
+  }
+
+  .filter-selects {
+    flex-direction: column;
+  }
+}
+
+/* ============ AI SEARCH ============ */
+.ai-search-panel {
+  position: relative;
+  margin-bottom: 18px;
+  padding: 20px;
+  border-radius: var(--lt-radius-lg);
+  border: 1px solid var(--lt-orange-line);
+  background: linear-gradient(135deg, #fff7ef, #fff 55%);
+  box-shadow: var(--lt-shadow-sm);
+}
+
+.ai-search-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ai-spark {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: #fff;
+  background: linear-gradient(135deg, #fb923c, var(--lt-orange));
+  box-shadow: 0 10px 24px -10px rgba(249, 115, 22, 0.7);
+}
+
+.ai-search-head h2 {
+  margin: 0 0 3px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.ai-search-head p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--lt-muted);
+}
+
+.ai-search-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 14px;
+  background: #fff;
+  border: 1px solid var(--lt-line);
+  border-radius: 13px;
+  transition: all var(--lt-transition);
+}
+
+.ai-search-form:focus-within {
+  border-color: var(--lt-orange-line);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+}
+
+.ai-search-form > i {
+  font-size: 19px;
+  color: var(--lt-orange);
+}
+
+.ai-search-form input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--lt-font);
+  font-size: 14px;
+}
+
+.ai-search-form .lt-btn {
+  flex: none;
+}
+
+.ai-search-suggest {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 11px;
+  font-size: 12.5px;
+  color: var(--lt-muted);
+}
+
+.ai-suggest-chip {
+  padding: 5px 11px;
+  border: 1px solid var(--lt-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--lt-ink-soft);
+  font-family: var(--lt-font);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all var(--lt-transition);
+}
+
+.ai-suggest-chip:hover {
+  color: var(--lt-orange-dark);
+  background: var(--lt-orange-soft);
+  border-color: var(--lt-orange-line);
+}
+
+.ai-search-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--lt-danger);
+}
+
+.ai-result-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--lt-orange-line);
+  background: linear-gradient(135deg, #fff7ef, #fff);
+}
+
+.ai-result-copy {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ai-result-icon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  color: #fff;
+  background: var(--lt-orange);
+}
+
+.ai-result-copy strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 14px;
+}
+
+.ai-result-copy p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--lt-muted);
+}
+
+.ai-result-bar .lt-btn {
+  flex: none;
+}
+
+@media (max-width: 720px) {
+  .ai-search-form {
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+
+  .ai-search-form input {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .ai-search-form .lt-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ai-result-bar {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>

@@ -69,7 +69,7 @@
                                 </td>
                             </tr>
                             <tr v-if="danhSachVoucher.length === 0">
-                                <td colspan="10">Chưa có voucher nào</td>
+                                <td colspan="10" class="lt-empty-cell">Chưa có voucher nào</td>
                             </tr>
                         </tbody>
                     </table>

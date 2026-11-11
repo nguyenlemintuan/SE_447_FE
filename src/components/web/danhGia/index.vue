@@ -81,7 +81,7 @@ export default {
         },
         async fetchReviews() {
             try {
-                const res = await axios.get(`http://127.0.0.1:8000/api/products/${this.productId}/reviews`);
+                const res = await axios.get(`http://127.0.0.1:8000/api/customer/products/${this.productId}/reviews`);
                 if (res.data.status) this.reviews = res.data.data;
             } catch (err) { console.error(err); }
         },

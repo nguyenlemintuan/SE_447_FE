@@ -1,6 +1,8 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import './assets/css/storefront.css'
+import './assets/css/taste-overrides.css'
 
 import Default from './layout/wrapper/index.vue'
 import VueLazyload from 'vue-lazyload'
@@ -8,13 +10,7 @@ import VueLazyload from 'vue-lazyload'
 import blank from './layout/wrapper/blank.vue'
 import admin from './layout/wrapper/admin.vue'
 import Toaster from "@meforma/vue-toaster";
-import icon from './assets/img/icon.svg';
 
-const link = document.createElement('link');
-link.rel = 'icon';
-link.type = 'image/png';
-link.href = icon;
-document.head.appendChild(link);
 const app = createApp(App)
 
 app.use(router)
