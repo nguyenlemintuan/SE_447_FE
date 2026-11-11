@@ -53,7 +53,7 @@ const stockBadge = computed(() => {
   if (!Number.isNaN(quantity) && quantity <= 3) {
     return { label: "Sắp hết", className: "is-warning" };
   }
-  return { label: "Chính hãng", className: "is-brand" };
+  return null;
 });
 
 function formatCurrency(value) {
